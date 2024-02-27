@@ -1,51 +1,53 @@
 "use client";
 
-import { useState } from 'react';
+import { generateQR } from '@/utils/api';
+import { MouseEvent, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 
 const generateBackground = async (url: string, prompt: string) => {
-    const payload = {
-        "qr_code_data": url,
-        "text_prompt": prompt
-    };
-
-    const response: any = await fetch("https://api.gooey.ai/v2/art-qr-code/", {
-        method: "POST",
-        headers: {
-            "Authorization": "Bearer " + process.env.NEXT_PUBLIC_GOOEY_API_KEY,
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-        throw new Error(response.status);
-    }
-
-    const result = await response.json();
-    console.log(response.status, result);
-    console.log('result', result);
-    return result.output.output_images[0];
+    return generateQR(url, prompt);
 };
 
 export default function HeroSection() {
     const [url, setUrl] = useState<string>('');
     const [prompt, setPrompt] = useState<string>('');
     const [qrCode, setQrCode] = useState<string>('');
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const handleGenerateClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleGenerateClick = async (e: MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         if (!url.trim()) {
-            toast.error('Please enter a URL.')
+            toast.error('Please enter a URL.');
             return;
         }
 
-        const qrImageUrl = await generateBackground(url, prompt);
-        setQrCode(qrImageUrl);
-        toast.success('Success! Your QR and background are ready!');
+        setIsLoading(true);
+        try {
+            const qrImageUrl = await generateBackground(url, prompt);
+            setQrCode(qrImageUrl);
+            toast.success('Success! Your QR and background are ready!');
+        } catch (error) {
+            toast.error('Failed to generate QR code.');
+            console.error(error);
+        }
+        setIsLoading(false);
+    };
+
+    const handleShareClick = async () => {
+        if (!qrCode) {
+            toast.error('No QR Code available to share.');
+            return;
+        }
+        try {
+            await navigator.clipboard.writeText(qrCode);
+            toast.success('QR Code URL copied to clipboard!');
+        } catch (err) {
+            console.error('Failed to copy QR Code URL:', err);
+            toast.error('Failed to copy QR Code URL.');
+        }
     };
 
     const handleDownloadClick = () => {
@@ -101,12 +103,18 @@ export default function HeroSection() {
                 <div className='flex flex-col items-center justify-center mt-8 md:mt-0'>
                     <h2 className="text-[48px] font-[700] leading-[110%] mb-4">Your QR Code</h2>
 
-                    <div className="min-w-[300px] min-h-[300px] bg-[#27272a] flex items-center justify-center rounded-xl md:p-4">
-                        {qrCode ? (
-                            <img src={qrCode} alt="Generated QR Code" />
-                        ) : (
-                            <p>Your generated QR will appear here.</p>
-                        )}
+                    <div className="w-[300px] h-[300px] bg-[#27272a] flex items-center justify-center rounded-xl md:p-4">
+                        <div className="w-[300px] h-[300px] bg-[#27272a] flex items-center justify-center rounded-xl md:p-4">
+                            {isLoading ? (
+                                <div>
+                                    <img src='images/icons/running-cat.gif' alt="" className='w-[150px] h-auto' />
+                                </div>
+                            ) : qrCode ? (
+                                <img src={qrCode} alt="Generated QR Code" />
+                            ) : (
+                                <p>Your generated QR will appear here.</p>
+                            )}
+                        </div>
                     </div>
 
                     <div className='mt-4 space-x-2'>
@@ -129,7 +137,9 @@ export default function HeroSection() {
                                     Download
                                 </Button>
 
-                                <Button>
+                                <Button
+                                    onClick={handleShareClick}
+                                >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         height="24"
