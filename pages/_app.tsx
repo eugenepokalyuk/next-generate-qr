@@ -1,4 +1,3 @@
-// pages/_app.tsx
 import Layout from '@/components/Layout';
 import type { AppProps } from 'next/app';
 import { Toaster } from 'sonner';

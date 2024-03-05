@@ -1,4 +1,3 @@
-
 export default function AboutSection() {
     return (
         <section className="flex justify-center items-center flex-col w-full lg:p-0 p-4">

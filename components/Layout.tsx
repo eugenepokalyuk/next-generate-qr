@@ -1,4 +1,3 @@
-// components/Layout.tsx
 import { FC } from 'react';
 import Header from './Header';
 interface LayoutProps {

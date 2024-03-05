@@ -1,6 +1,5 @@
 "use client";
 
-// import { generateQR } from '@/utils/api';
 import { MouseEvent, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from './ui/button';
@@ -8,7 +7,6 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 
 const generateBackground = async (url: string, prompt: string) => {
-    // return generateQR(url, prompt);
     const response = await fetch("/api/generateQR", {
         method: "POST",
         headers: {

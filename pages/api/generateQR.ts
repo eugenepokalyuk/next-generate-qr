@@ -7,7 +7,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             const response = await fetch("https://api.gooey.ai/v2/art-qr-code/", {
                 method: "POST",
                 headers: {
-                    "Authorization": "Bearer " + process.env.NEXT_PUBLIC_GOOEY_API_KEY, // Здесь используется переменная окружения без `NEXT_PUBLIC_`
+                    "Authorization": "Bearer " + process.env.NEXT_PUBLIC_GOOEY_API_KEY,
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
